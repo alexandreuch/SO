@@ -26,3 +26,12 @@ Veja alguns cenários de execução de programas:
 > **./prog1 < entrada** – roda **prog1** e recebe como input o arquivo entrada
 >
 > **./prog1 | ./prog2** – faz a saída de **prog1** ser a entrada de **prog2**
+
+## ⚙️ Módulos
+<img src="modulos.png"
+     style="width:500px;" />
+
+Este trabalho foi dividido em 3 partes, cada uma com suas responsabilidades dentro do projeto.
+A **Interface** é responsável por mostrar ao usuário informações do estado do terminal e controlar as E/S dos programas. 
+O **Query Parser** vai entender os comandos fornecidos e transcrever para as funções do terminal.
+E por fim, a **Execução** das funções contruídas para o terminal funcionar.
