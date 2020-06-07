@@ -1,19 +1,4 @@
-#include"proto-terminal.h"
-
-void startTerminal()
-{
-    puts("\n\n"
-    "\n****************************"
-    "\n*****  Proto-Terminal  *****"
-    "\n****************************"
-    ); 
-  
-    return; 
-
-}
-
-
-void help()
+void openHelp()
 { 
     puts("\n*******Comandos do Terminal*******"
         "\n>cd -> Abre o diretório desejado"
@@ -23,5 +8,4 @@ void help()
         "\n>exit -> Fecha o terminal"); 
   
     return; 
-}
-
+} 
