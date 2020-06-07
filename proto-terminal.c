@@ -1,3 +1,5 @@
+#include"proto-terminal.h"
+
 void openHelp()
 { 
     puts("\n*******Comandos do Terminal*******"
