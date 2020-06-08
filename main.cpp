@@ -34,12 +34,18 @@ void parser(string entrada){
     int ini = 0, index = 0, cont = 0;
 
     for(int i=0; i<entrada.length();i++){
-        if(isspace(entrada[i])){
-            buffer[index] = entrada.substr(ini,cont);
-            ini = i + 1;
-            cont = -1;
-            index++;
-        } 
+        if(isspace(entrada[i]) && isspace(entrada[i-1]) && i>0){
+            ini++;
+            cont --;
+        }
+        else{
+            if(isspace(entrada[i])){
+                buffer[index] = entrada.substr(ini,cont);
+                ini = i + 1;
+                cont = -1;
+                index++;
+            } 
+        }    
         cont ++;
     }
     buffer[index] = entrada.substr(ini,cont);
@@ -47,7 +53,7 @@ void parser(string entrada){
     for(int i = 0;i <= index;i++){
         cout << buffer[i] << "\n";
     }
-
+ 
     return;
 
 }
