@@ -1,6 +1,9 @@
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
+#include <iostream>
+#include <string>
+#include <cctype>
+#include <cstdlib>
+
+using namespace std;
+
 void startTerminal();
 void help();
