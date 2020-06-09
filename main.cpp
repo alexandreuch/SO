@@ -1,6 +1,4 @@
 #include "proto-terminal.h"
-#include <unistd.h>
-#include <sys/wait.h> 
 
 #define NMAX 1000 // maximo  de comandos
 #define SMAX 100  // maximo de argumentos
@@ -14,7 +12,6 @@ void help()
         "\n║> pwd -> Mostra o caminho completo para o diretório atual.                    ║"
         "\n║> ./ -> Usado para abrir diretório e pode ser modificado com: >, <, | e &.    ║"
         "\n║> exit -> Fecha o terminal.                                                   ║"
-        "\n║>Digite help + comando para saber mais sobre o comando desejado               ║" 
         "\n║                                                                              ║" 
         "\n╚══════════════════════════════════════════════════════════════════════════════╝\n");
 
@@ -24,17 +21,18 @@ void help()
 void cd(string buffer[], int index){
     string pathAux;
     fs::path diretorio;
+    fs::directory_entry flag;
 
-    if(index <=1){
+    if(index <= 1){
         cout << "Diretório não especificado corretamente.\n";
         return;
     }
-    if(index=2 && buffer[1]==".."){
+    if(index == 2 && buffer[1] == ".."){
         diretorio=fs::current_path().parent_path();
         fs::current_path(diretorio);
         return;
     }
-    else if(index>2){
+    else if(index > 2){
         for(int i = 1; i<=index; i++){
             pathAux += buffer[i];
         }
@@ -43,23 +41,58 @@ void cd(string buffer[], int index){
         pathAux = buffer[1];
     }
 
+    flag.assign(pathAux);
+    if(!flag.exists()){
+        cout << "Diretório não especificado corretamente.\n";
+        return;
+    }
+
     diretorio = pathAux;
     fs::current_path(diretorio);
 
     return;
 }
-    
-void ls(){
-    string path = fs::current_path();
-    int tamanhoPath = (path.length()+1);
-    cout << endl;
 
+void ls(string buffer[], int index){
+    string path;
+    int tamanhoPath;
+    fs::directory_entry diretorio;
+
+    if(index == 1 ){
+        path = fs::current_path();
+        tamanhoPath = (path.length()+1);
+    }
+    else{
+        if(index >= 2){
+            for(int i = 1; i<=index; i++){
+                path += buffer[i];
+                if(i < index-1){ 
+                    path += " ";
+                }
+            }
+            path = (fs::path)path;
+            tamanhoPath = path.length();
+
+
+        }
+    }
+
+    diretorio.assign(path);
+
+    if(!diretorio.exists()){
+        cout << "Diretório não especificado corretamente.\n";
+        return;
+    }
+        
+    cout << endl;
     for(const auto & entry : fs::directory_iterator(path)){
         string ls = (entry.path());
         cout << ls.substr(tamanhoPath) << endl;
     }
     cout << endl;
+    
     return;
+    
 }
 
 void pwd(){
@@ -105,13 +138,10 @@ void executa();
 
 void interpretador(string buffer[], int index){
     string pathAux = ("");
-
     fs::path diretorio;
-    
-    int flag = verificaPipe(buffer,index);
-    int flagExec = (verificaExec(buffer[0]));
+    int flag = verificaPipe(buffer,index), flagExec = (verificaExec(buffer[0]));
 
-    if(flag == 0){    
+    if(verificaPipe == 0){
         if(buffer[0] == "help"){
             help();
         }
@@ -119,23 +149,22 @@ void interpretador(string buffer[], int index){
             cd(buffer, index);
         }
         else if(buffer[0] == "ls"){
-            ls();
+            ls(buffer, index);
         }
         else if(buffer[0] == "pwd"){
             pwd();
-            cout << "\n";
+            cout << endl;
         }
         else if(buffer[0] == "\0");
-        
         else if(flagExec >= 1 && index == 1){
-            if (flagExec == 1){
-                buffer[0] = "./" + buffer[0];
+                if (flagExec == 1){
+                    buffer[0] = "./" + buffer[0];
+
+                }
+
+                //executa();
 
             }
-
-            //executa();
-
-        }
         else{
             string aux ("");
             for(int i = 0; i < index; i++){
@@ -146,14 +175,11 @@ void interpretador(string buffer[], int index){
                     aux += buffer[i] + " ";
                 }
             }
-        
-        cout << "O comando '" << aux << "' nao e conhecido.\n";
+            cout << "O comando '" << aux << "' não é conhecido.\n";
         }
-    }    
-    else{
-
     }
-    
+    else;
+
     return;
 }
 
@@ -177,22 +203,41 @@ void parser(string entrada){
         fim ++;
     }
     buffer[index] = entrada.substr(ini,fim);
-    index++;
-    
+    if(buffer[index] != ""){
+        index++;
+    }
+
     /*
     for(int i = 0;i <= index;i++){
         cout << buffer[i] << "\n";
     }
     cout <<"index "<< index << "\n";
+    return;
     */
-    
+
     interpretador(buffer, index);
     
     return;
 }
 
-string startTerminal()
-{
+int takeInput(string username){
+    string entrada("");
+    cout << username;
+    pwd();
+    cout << " > ";
+    
+    getline(cin,entrada);
+    if(entrada == "exit"){
+        return 0;
+    }
+    else{
+        parser(entrada);
+    }
+    
+    return 1;
+}
+
+string startTerminal(){
     puts(
     "\n╔══════════════════════════════════════════════════════════════╗"
     "\n║                        PROTO-TERMINAL©                       ║"
@@ -205,21 +250,13 @@ string startTerminal()
 }
 
 int main(){
-
-    string entrada (""), username = ("");
-
-    username = startTerminal()+"@";
+    
+    string entrada(""), username("");
+    int status;
+    username = startTerminal();
     
     do{
-        cout << username;
-        pwd();
-        cout << " ─► ";
-        
-        getline(cin,entrada);
-        if(entrada != "exit"){
-            parser(entrada);
-        }
-
-    }while(entrada != "exit");
+        status = takeInput(username);
+    }while(status);
 
 }
