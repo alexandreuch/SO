@@ -2,8 +2,13 @@
 #include <string>
 #include <cctype>
 #include <cstdlib>
+#include <filesystem>
 
 using namespace std;
-
-void startTerminal();
+namespace fs = std::filesystem;
+string startTerminal();
 void help();
+
+void cd(string);
+void interpretador(string, int);
+void pwd();
