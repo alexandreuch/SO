@@ -67,38 +67,54 @@ void pwd(){
     return;
 }
 
+int verificaPipe(string buffer[],int index){
+    for(int i = 0; i < index; i++){
+        if(buffer[i] == "|"){
+            return 1;
+        }    
+    }
+    return 0;
+}
+
 void interpretador(string buffer[], int index){
     string pathAux = ("");
+    int flag = 0;
 
     fs::path diretorio;
-
-    if(buffer[0] == "help"){
-        help();
-    }
-    else if(buffer[0] == "cd"){
-        cd(buffer, index);
-    }
-    else if(buffer[0] == "ls"){
-        ls();
-    }
-    else if(buffer[0] == "pwd"){
-        pwd();
-        cout << "\n";
-    }
-    else if(buffer[0] == "\0");
-    else{
-        string aux ("");
-        for(int i = 0; i < index; i++){
-            if(i == (index-1)){
-                aux += buffer[i];
-            }
-            else{
-                aux += buffer[i] + " ";
-            }
+    flag = verificaPipe(buffer,index);
+    if(flag == 0){    
+        if(buffer[0] == "help"){
+            help();
         }
-    
+        else if(buffer[0] == "cd"){
+            cd(buffer, index);
+        }
+        else if(buffer[0] == "ls"){
+            ls();
+        }
+        else if(buffer[0] == "pwd"){
+            pwd();
+            cout << "\n";
+        }
+        else if(buffer[0] == "\0");
+        else{
+            string aux ("");
+            for(int i = 0; i < index; i++){
+                if(i == (index-1)){
+                    aux += buffer[i];
+                }
+                else{
+                    aux += buffer[i] + " ";
+                }
+            }
+        
         cout << "O comando '" << aux << "' nao e conhecido.\n";
+        }
+    }    
+    else{
+
     }
+    
     return;
 }
 
