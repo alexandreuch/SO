@@ -9,6 +9,6 @@ namespace fs = std::filesystem;
 string startTerminal();
 void help();
 
-void cd(string);
+void cd(string, int);
 void interpretador(string, int);
 void pwd();

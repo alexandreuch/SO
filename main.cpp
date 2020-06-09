@@ -3,9 +3,6 @@
 #define NMAX 1000 // maximo  de comandos
 #define SMAX 100  // maximo de argumentos
 
-
-
-
 void help()
 { 
     puts("\n************************** Comandos do Terminal **************************\n"
@@ -15,20 +12,49 @@ void help()
         "\n> ./ -> Usado para abrir diretório e pode ser modificado com: >, <, | e &."
         "\n> exit -> Fecha o terminal.\n"
         "\n***************************************************************************"); 
-    
+
     return; 
 }
 
 
-void cd(string path){
-    cout << path;
-    //cout << fs::current_path();
+void cd(string buffer[], int index){
+    string pathAux;
+    fs::path diretorio;
+
+    if(index <=1){
+        cout << "Diretório não especificado corretamente.\n";
+        return;
+    }
+    if(index=2 && buffer[1]==".."){
+        diretorio=fs::current_path().parent_path();
+        fs::current_path(diretorio);
+        return;
+    }
+    else if(index>2){
+        for(int i = 1; i<=index; i++){
+            pathAux += buffer[i];
+        }
+    } 
+    else{
+        pathAux = buffer[1];
+    }
+
+    diretorio = pathAux;
+
+    fs::current_path(diretorio);
+
+    return;
 }
     
-void ls();
+void ls(){
+
+    return;
+}
 void pwd(){
     fs::path diretorio = fs::current_path();
-    cout << diretorio;
+    string dir = ((string)diretorio);
+    cout << dir;
+
     return;
 }
 
@@ -42,44 +68,30 @@ void interpretador(string buffer[], int index){
         return;
     }
     else if(buffer[0] == "cd"){
-        if(index <=1){
-            cout << "Diretório não especificado corretamente.\n";
-        }
-        else if(index>2){
-            for(int i = 1; i<=index; i++){
-                pathAux += buffer[i];
-            }
-        } 
-        else{
-            pathAux = buffer[1];
-        }
-
-        diretorio = pathAux;
-        cd(diretorio);
-        //cout << fs::current_path() << "\n";
-
+        cd(buffer, index);
         return;
     }
     else if(buffer[0] == "ls"){
-        //ls();
-        cout << "ls\n";
+        ls();
         return;
     }
     else if(buffer[0] == "pwd"){
         pwd();
-        cout << "pwd\n";
         return;
     }
-
+    else if(buffer[0] == "\0"){
+        return;
+    }
     else{
-        cout << "Comando não encontrado.\n";
+        
+        cout << "'" << aux << "'" <<" não é um comando conhecido.\n";
         return;
     }
 }
 
 void parser(string entrada){
     string buffer[NMAX];
-    int ini = 0,fim = 0 ,index = 0;
+    int ini = 0, fim = 0, index = 0;
 
     for(int i=0; i<entrada.length();i++){
         if(isspace(entrada[i]) && isspace(entrada[i-1]) && i>0){
@@ -97,11 +109,13 @@ void parser(string entrada){
         fim ++;
     }
     buffer[index] = entrada.substr(ini,fim);
+    index++;
     
     /*
     for(int i = 0;i <= index;i++){
         cout << buffer[i] << "\n";
     }
+    cout <<"index "<< index << "\n";
     */
     
     interpretador(buffer, index);
@@ -129,12 +143,12 @@ int main(){
     //path 
     // /= append 
 
-    username = startTerminal()+"::";
+    username = startTerminal()+"@";
     
     do{
         cout << username;
         pwd();
-        cout << "> ";
+        cout << " > ";
         
         getline(cin,entrada);
         if(entrada != "exit"){
