@@ -14,6 +14,7 @@ void help()
         "\n║> pwd -> Mostra o caminho completo para o diretório atual.                    ║"
         "\n║> ./ -> Usado para abrir diretório e pode ser modificado com: >, <, | e &.    ║"
         "\n║> exit -> Fecha o terminal.                                                   ║"
+        "\n║>Digite help + comando para saber mais sobre o comando desejado               ║" 
         "\n║                                                                              ║" 
         "\n╚══════════════════════════════════════════════════════════════════════════════╝\n");
 
@@ -206,8 +207,6 @@ string startTerminal()
 int main(){
 
     string entrada (""), username = ("");
-    //path 
-    // /= append 
 
     username = startTerminal()+"@";
     
