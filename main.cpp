@@ -5,13 +5,15 @@
 
 void help()
 { 
-    puts("\n************************** Comandos do Terminal **************************\n"
-        "\n> cd -> Abre o diretório desejado."
-        "\n> ls -> Mostra o diretório atual."
-        "\n> pwd -> Mostra o caminho completo para o diretório atual."
-        "\n> ./ -> Usado para abrir diretório e pode ser modificado com: >, <, | e &."
-        "\n> exit -> Fecha o terminal.\n"
-        "\n***************************************************************************"); 
+    puts("\n╔════════════════════════════ Comandos do Terminal ════════════════════════════╗"
+        "\n║                                                                              ║" 
+        "\n║> cd -> Abre o diretório desejado.                                            ║" 
+        "\n║> ls -> Mostra o diretório atual.                                             ║"
+        "\n║> pwd -> Mostra o caminho completo para o diretório atual.                    ║"
+        "\n║> ./ -> Usado para abrir diretório e pode ser modificado com: >, <, | e &.    ║"
+        "\n║> exit -> Fecha o terminal.                                                   ║"
+        "\n║                                                                              ║" 
+        "\n╚══════════════════════════════════════════════════════════════════════════════╝\n");
 
     return; 
 }
@@ -48,10 +50,11 @@ void cd(string buffer[], int index){
 void ls(){
     string path = fs::current_path();
     int tamanhoPath = (path.length()+1);
+    cout << endl;
 
     for(const auto & entry : fs::directory_iterator(path)){
         string ls = (entry.path());
-        cout << ls.substr(tamanhoPath) << "\t";
+        cout << ls.substr(tamanhoPath) << endl;
     }
     cout << endl;
     return;
@@ -136,10 +139,9 @@ void parser(string entrada){
 string startTerminal()
 {
     puts(
-    "\n****************************"
-    "\n*****  Proto-Terminal  *****"
-    "\n****************************"
-    "\n"
+    "\n╔══════════════════════════════════════════════════════════════╗"
+    "\n║                        PROTO-TERMINAL©                       ║"
+    "\n╚══════════════════════════════════════════════════════════════╝\n\n"
     ); 
     
     string username =  getenv("USER"); 
@@ -158,7 +160,7 @@ int main(){
     do{
         cout << username;
         pwd();
-        cout << " > ";
+        cout << " ─► ";
         
         getline(cin,entrada);
         if(entrada != "exit"){
