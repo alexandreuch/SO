@@ -1,4 +1,6 @@
 #include "proto-terminal.h"
+#include <unistd.h>
+#include <sys/wait.h> 
 
 #define NMAX 1000 // maximo  de comandos
 #define SMAX 100  // maximo de argumentos
@@ -17,7 +19,6 @@ void help()
 
     return; 
 }
-
 
 void cd(string buffer[], int index){
     string pathAux;
@@ -59,6 +60,7 @@ void ls(){
     cout << endl;
     return;
 }
+
 void pwd(){
     fs::path diretorio = fs::current_path();
     string dir = ((string)diretorio);
@@ -67,8 +69,8 @@ void pwd(){
     return;
 }
 
-int verificaPipe(string buffer[],int index){
-    for(int i = 0; i < index; i++){
+int verificaPipe(string buffer[],int index){ // Verifica se em alguma parte da string o | e encontrado
+    for(int i = 0; i < index; i++){ 
         if(buffer[i] == "|"){
             return 1;
         }    
@@ -76,12 +78,38 @@ int verificaPipe(string buffer[],int index){
     return 0;
 }
 
+int verificaExec(string elemento){
+    string path = fs::current_path();
+    int tamanhoPath = (path.length()+1);
+    int tamanhoElemento = elemento.length();
+    int retorno = 0; // Indica se o elemento e um ./exec ou exec
+
+    if(elemento[0] == '.' && elemento[1] == '/'){ // Faz os os ./exec virarem exec.
+        elemento = elemento.substr(2,tamanhoElemento);
+        retorno++;
+    }
+
+    for(const auto & entry : fs::directory_iterator(path)){ // Verifica se o exec esta presente no diretorio atual
+        string ls = (entry.path());
+        string aux = ls.substr(tamanhoPath);
+        if(elemento == aux){
+            retorno++;
+            return retorno;
+        }
+    }
+   return 0;
+}
+
+void executa();
+
 void interpretador(string buffer[], int index){
     string pathAux = ("");
-    int flag = 0;
 
     fs::path diretorio;
-    flag = verificaPipe(buffer,index);
+    
+    int flag = verificaPipe(buffer,index);
+    int flagExec = (verificaExec(buffer[0]));
+
     if(flag == 0){    
         if(buffer[0] == "help"){
             help();
@@ -97,6 +125,16 @@ void interpretador(string buffer[], int index){
             cout << "\n";
         }
         else if(buffer[0] == "\0");
+        
+        else if(flagExec >= 1 && index == 1){
+            if (flagExec == 1){
+                buffer[0] = "./" + buffer[0];
+
+            }
+
+            //executa();
+
+        }
         else{
             string aux ("");
             for(int i = 0; i < index; i++){
@@ -166,7 +204,7 @@ string startTerminal()
 }
 
 int main(){
-    
+
     string entrada (""), username = ("");
     //path 
     // /= append 
@@ -185,5 +223,4 @@ int main(){
 
     }while(entrada != "exit");
 
-    // (destructor) path
 }
