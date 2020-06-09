@@ -4,11 +4,19 @@
 #include <cstdlib>
 #include <filesystem>
 
+
+
 using namespace std;
 namespace fs = std::filesystem;
-string startTerminal();
-void help();
 
-void cd(string, int);
+
+string startTerminal();
+int takeInput(string);
+void parser(string);
 void interpretador(string, int);
+
+
+void help();
+void cd(string, int);
 void pwd();
+void ls(string, int);
