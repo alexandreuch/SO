@@ -40,14 +40,20 @@ void cd(string buffer[], int index){
     }
 
     diretorio = pathAux;
-
     fs::current_path(diretorio);
 
     return;
 }
     
 void ls(){
+    string path = fs::current_path();
+    int tamanhoPath = (path.length()+1);
 
+    for(const auto & entry : fs::directory_iterator(path)){
+        string ls = (entry.path());
+        cout << ls.substr(tamanhoPath) << "\t";
+    }
+    cout << endl;
     return;
 }
 void pwd(){
@@ -65,28 +71,32 @@ void interpretador(string buffer[], int index){
 
     if(buffer[0] == "help"){
         help();
-        return;
     }
     else if(buffer[0] == "cd"){
         cd(buffer, index);
-        return;
     }
     else if(buffer[0] == "ls"){
         ls();
-        return;
     }
     else if(buffer[0] == "pwd"){
         pwd();
-        return;
+        cout << "\n";
     }
-    else if(buffer[0] == "\0"){
-        return;
-    }
+    else if(buffer[0] == "\0");
     else{
-        
-        cout << "'" << aux << "'" <<" não é um comando conhecido.\n";
-        return;
+        string aux ("");
+        for(int i = 0; i < index; i++){
+            if(i == (index-1)){
+                aux += buffer[i];
+            }
+            else{
+                aux += buffer[i] + " ";
+            }
+        }
+    
+        cout << "O comando '" << aux << "' nao e conhecido.\n";
     }
+    return;
 }
 
 void parser(string entrada){
