@@ -1,4 +1,7 @@
 #include "proto-terminal.h"
+#include <unistd.h>
+#include <cstring>
+#include <sys/wait.h> 
 
 #define NMAX 1000 // maximo  de comandos
 #define SMAX 100  // maximo de argumentos
@@ -52,7 +55,7 @@ void cd(string buffer[], int index){
 
     return;
 }
-
+    
 void ls(string buffer[], int index){
     string path;
     int tamanhoPath;
@@ -131,17 +134,91 @@ int verificaExec(string elemento){
             return retorno;
         }
     }
-   return 0;
+    return 0;
 }
 
-void executa();
+void executa(char** vetor) { 
+    
+    pid_t pid = fork();  
+
+    if (pid < 0) { 
+        cout << "Falha no Fork\n"; 
+        return; 
+    } else if (!pid) {
+        int flag = execvp(vetor[0], vetor);
+
+        if (flag < 0) { 
+            cout << "O comando não existe\n"; 
+        }
+        
+        exit(0); 
+    
+    } else {
+        wait(NULL);  
+        return; 
+    } 
+}
+
+void execArgsPiped(char** parsed, char** parsedpipe){ 
+    int pipefd[2];  
+    pid_t p1, p2; 
+  
+    if (pipe(pipefd) < 0) { 
+        cout << "\nPipe could not be initialized"; 
+        return; 
+    } 
+    p1 = fork(); 
+    if (p1 < 0) { 
+        cout << "\nCould not fork"; 
+        return; 
+    } 
+  
+    if (p1 == 0) {
+        close(pipefd[0]); 
+        dup2(pipefd[1], STDOUT_FILENO); 
+        close(pipefd[1]); 
+  
+        if (execvp(parsed[0], parsed) < 0) { 
+            cout << "\nCould not execute command 1.."; 
+            exit(0); 
+        }
+
+    } else {
+        p2 = fork();   
+        
+        if (p2 < 0) { 
+            printf("\nCould not fork"); 
+            return; 
+        } 
+
+        if (p2 == 0) { 
+            close(pipefd[1]); 
+            dup2(pipefd[0], STDIN_FILENO); 
+            close(pipefd[0]); 
+            if (execvp(parsedpipe[0], parsedpipe) < 0) { 
+                cout << "\nCould not execute command 2.."; 
+                exit(0); 
+            } 
+        
+        } else {
+            wait(NULL); 
+            wait(NULL); 
+        } 
+    } 
+} 
 
 void interpretador(string buffer[], int index){
     string pathAux = ("");
-    fs::path diretorio;
-    int flag = verificaPipe(buffer,index), flagExec = (verificaExec(buffer[0]));
 
-    if(verificaPipe == 0){
+    fs::path diretorio;
+    int flagExec = (verificaExec(buffer[0]));
+    int flag = verificaPipe(buffer,index);
+
+    if (flagExec == 1){
+        buffer[0] = "./" + buffer[0];
+    }
+
+    if(flag == 0){    
         if(buffer[0] == "help"){
             help();
         }
@@ -149,22 +226,27 @@ void interpretador(string buffer[], int index){
             cd(buffer, index);
         }
         else if(buffer[0] == "ls"){
-            ls(buffer, index);
+            ls(buffer,index);
         }
         else if(buffer[0] == "pwd"){
             pwd();
-            cout << endl;
+            cout << "\n";
         }
         else if(buffer[0] == "\0");
-        else if(flagExec >= 1 && index == 1){
-                if (flagExec == 1){
-                    buffer[0] = "./" + buffer[0];
-
-                }
-
-                //executa();
-
+        
+        else if(buffer[0][0] == '.' && buffer[0][1] == '/'){
+            //Transformar em funcao e usar-la no pipe.
+            char *char_array[index+1];
+            int i = 0;
+            for(i = 0; i <= index; i++){
+                char_array[i] = (char *)malloc(40*sizeof(char));
+                strcpy(char_array[i], buffer[i].c_str());
             }
+            char_array[i] = (char *)malloc(40*sizeof(char));
+            char_array[i] = NULL;
+            executa(char_array);
+
+        }
         else{
             string aux ("");
             for(int i = 0; i < index; i++){
@@ -175,10 +257,14 @@ void interpretador(string buffer[], int index){
                     aux += buffer[i] + " ";
                 }
             }
-            cout << "O comando '" << aux << "' não é conhecido.\n";
+        
+        cout << "O comando '" << aux << "' nao e conhecido.\n";
         }
+    }    
+    else{
+
+
     }
-    else;
 
     return;
 }
@@ -203,28 +289,38 @@ void parser(string entrada){
         fim ++;
     }
     buffer[index] = entrada.substr(ini,fim);
-    if(buffer[index] != ""){
-        index++;
-    }
-
+    index++;
+    
     /*
     for(int i = 0;i <= index;i++){
         cout << buffer[i] << "\n";
     }
     cout <<"index "<< index << "\n";
-    return;
     */
-
+    
     interpretador(buffer, index);
     
     return;
+}
+
+string startTerminal()
+{
+    puts(
+    "\n╔══════════════════════════════════════════════════════════════╗"
+    "\n║                        PROTO-TERMINAL©                       ║"
+    "\n╚══════════════════════════════════════════════════════════════╝\n\n"
+    ); 
+    
+    string username =  getenv("USER"); 
+    
+    return username; 
 }
 
 int takeInput(string username){
     string entrada("");
     cout << username;
     pwd();
-    cout << " > ";
+    cout << " ─► ";
     
     getline(cin,entrada);
     if(entrada == "exit"){
@@ -237,22 +333,11 @@ int takeInput(string username){
     return 1;
 }
 
-string startTerminal(){
-    puts(
-    "\n╔══════════════════════════════════════════════════════════════╗"
-    "\n║                        PROTO-TERMINAL©                       ║"
-    "\n╚══════════════════════════════════════════════════════════════╝\n\n"
-    ); 
-    
-    string username =  getenv("USER"); 
-    
-    return username; 
-}
-
 int main(){
     
     string entrada(""), username("");
     int status;
+
     username = startTerminal();
     
     do{
