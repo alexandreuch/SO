@@ -13,8 +13,9 @@ void help()
         "\n║> cd -> Abre o diretório desejado.                                            ║" 
         "\n║> ls -> Mostra o diretório atual.                                             ║"
         "\n║> pwd -> Mostra o caminho completo para o diretório atual.                    ║"
-        "\n║> ./ -> Usado para abrir diretório e pode ser modificado com: >, <, | e &.    ║"
-        "\n║> exit -> Fecha o terminal.                                                   ║"
+        "\n║> ./Exec ou Exec -> Executa.                                                  ║"
+        "\n║> Modificadores:  >, <, | e &.                                                ║"
+        "\n║> exit -> Fecha o terminal.                                                   ║" 
         "\n║                                                                              ║" 
         "\n╚══════════════════════════════════════════════════════════════════════════════╝\n");
 
@@ -107,12 +108,13 @@ void pwd(){
 }
 
 int verificaPipe(string buffer[],int index){ // Verifica se em alguma parte da string o | e encontrado
+    int flag = 0;
     for(int i = 0; i < index; i++){ 
         if(buffer[i] == "|"){
-            return 1;
+            flag ++;
         }    
     }
-    return 0;
+    return flag;
 }
 
 int verificaExec(string elemento){
@@ -159,17 +161,17 @@ void executa(char** vetor) {
     } 
 }
 
-void execArgsPiped(char** parsed, char** parsedpipe){ 
+void execPipe(char** parsed, char** parsedpipe){ 
     int pipefd[2];  
     pid_t p1, p2; 
   
     if (pipe(pipefd) < 0) { 
-        cout << "\nPipe could not be initialized"; 
+        cout << "Pipe não pode ser inicializado\n"; 
         return; 
     } 
     p1 = fork(); 
     if (p1 < 0) { 
-        cout << "\nCould not fork"; 
+        cout << "Problemas com o Fork\n"; 
         return; 
     } 
   
@@ -179,7 +181,7 @@ void execArgsPiped(char** parsed, char** parsedpipe){
         close(pipefd[1]); 
   
         if (execvp(parsed[0], parsed) < 0) { 
-            cout << "\nCould not execute command 1.."; 
+            cout << "O comando 1 não pode ser executado\n"; 
             exit(0); 
         }
 
@@ -187,7 +189,7 @@ void execArgsPiped(char** parsed, char** parsedpipe){
         p2 = fork();   
         
         if (p2 < 0) { 
-            printf("\nCould not fork"); 
+            cout << "Problemas com o Fork\n";  
             return; 
         } 
 
@@ -196,7 +198,7 @@ void execArgsPiped(char** parsed, char** parsedpipe){
             dup2(pipefd[0], STDIN_FILENO); 
             close(pipefd[0]); 
             if (execvp(parsedpipe[0], parsedpipe) < 0) { 
-                cout << "\nCould not execute command 2.."; 
+                cout << "O comando 2 não pode ser executado\n"; 
                 exit(0); 
             } 
         
@@ -239,10 +241,10 @@ void interpretador(string buffer[], int index){
             char *char_array[index+1];
             int i = 0;
             for(i = 0; i <= index; i++){
-                char_array[i] = (char *)malloc(40*sizeof(char));
+                char_array[i] = (char *)malloc(100*sizeof(char));
                 strcpy(char_array[i], buffer[i].c_str());
             }
-            char_array[i] = (char *)malloc(40*sizeof(char));
+            char_array[i] = (char *)malloc(100*sizeof(char));
             char_array[i] = NULL;
             executa(char_array);
 
@@ -261,11 +263,65 @@ void interpretador(string buffer[], int index){
         cout << "O comando '" << aux << "' nao e conhecido.\n";
         }
     }    
-    else{
 
+    else if(flag == 1){
+        string parsedBuffer[NMAX], parsedPipe[NMAX];
+        int pipePos,i,j;
+           
+        for(i = 0, j=0; i<=index; i++){
+            if(buffer[i] == "|"){
+                pipePos = i;
+                break;
+            }
+            parsedBuffer[j] = buffer[i];
+            j++;
+            }
+        
+        j = 0;
+        for(i=pipePos+1; i<=index; i++){
+            parsedPipe[j]=buffer[i];
+            j++;
+        }
+        
+        if(parsedBuffer[0][0] != '.' && parsedBuffer[0][1] != '/'){
+            parsedBuffer[0] = "./" + parsedBuffer[0];
+        }
+
+        if(parsedPipe[0][0] != '.' && parsedPipe[0][1] != '/'){
+            parsedPipe[0] = "./" + parsedPipe[0];
+        }
+        
+        int tamanhoPBUFF = pipePos;
+        int tamanhoPPIPE = j-1;
+        
+        char *char_PBUFF[tamanhoPBUFF+1];
+        char *char_PPIPE[tamanhoPPIPE+1];
+
+        i = 0;
+        j = 0;
+        
+        for(i = 0; i < tamanhoPBUFF; i++){
+            char_PBUFF[i] = (char *)malloc(100*sizeof(char));
+            strcpy(char_PBUFF[i], parsedBuffer[i].c_str());
+        }
+        char_PBUFF[i] = (char *)malloc(40*sizeof(char));
+        char_PBUFF[i] = NULL;
+
+        for(j = 0; j < tamanhoPPIPE; j++){
+            char_PPIPE[j] = (char *)malloc(100*sizeof(char));
+            strcpy(char_PPIPE[j], parsedPipe[j].c_str());
+        }
+        char_PPIPE[j] = (char *)malloc(100*sizeof(char));
+        char_PPIPE[j] = NULL;
+
+        execPipe(char_PBUFF,char_PPIPE);
 
     }
-
+    
+    else{
+        cout << "O programa não roda tantos pipes.\n";
+    }
+    
     return;
 }
 
