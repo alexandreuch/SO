@@ -209,6 +209,15 @@ void execPipe(char** parsed, char** parsedpipe){
     } 
 } 
 
+int has_pipe(string buffer[],int index){
+    for(int i=0; i<=index; i++){
+        if(buffer[i]=="|"){
+            return i;
+        }
+    }
+    return 0;
+}
+
 void interpretador(string buffer[], int index){
     string pathAux = ("");
 
@@ -238,15 +247,36 @@ void interpretador(string buffer[], int index){
         
         else if(buffer[0][0] == '.' && buffer[0][1] == '/'){
             //Transformar em funcao e usar-la no pipe.
-            char *char_array[index+1];
-            int i = 0;
-            for(i = 0; i <= index; i++){
+            int pipe_index = has_pipe(buffer);
+            if(pipe_index!=0){
+                char *char_array[index+1];
+                int i = 0;
+                for(i = 0; i <= index; i++){
+                    char_array[i] = (char *)malloc(100*sizeof(char));
+                    strcpy(char_array[i], buffer[i].c_str());
+                }
                 char_array[i] = (char *)malloc(100*sizeof(char));
-                strcpy(char_array[i], buffer[i].c_str());
+                char_array[i] = NULL;
+                executa(char_array);
+            }else{
+                char *char_array[pipe_index+1];
+                char *char_array_pipe[index-pipe_index+1];
+                int i=0;
+                for(;i < pipe_index; i++){
+                    char_array[i] = (char *)malloc(100*sizeof(char));
+                    strcpy(char_array[i], buffer[i].c_str());
+                }
+                char_array[i] = (char *)malloc(100*sizeof(char));
+                char_array[i] = NULL;
+                i++;
+                for(;i<= index; i++){
+                    char_array_pipe[i] = (char *)malloc(100*sizeof(char));
+                    strcpy(char_array_pipe[i], buffer[i].c_str());
+                }
+                char_array_pipe[i] = (char *)malloc(100*sizeof(char));
+                char_array_pipe[i] = NULL;
+                execPipe(char_array, char_array_pipe);
             }
-            char_array[i] = (char *)malloc(100*sizeof(char));
-            char_array[i] = NULL;
-            executa(char_array);
 
         }
         else{
