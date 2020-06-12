@@ -139,7 +139,7 @@ int verificaExec(string elemento){
     return 0;
 }
 
-void executa(char** vetor) { 
+void executa(char** vetor, int index) { 
     
     pid_t pid = fork();  
 
@@ -156,7 +156,9 @@ void executa(char** vetor) {
         exit(0); 
     
     } else {
-        wait(NULL);  
+        if (vetor[index] != "&"){
+            wait(NULL);  
+        }
         return; 
     } 
 }
@@ -257,7 +259,7 @@ void interpretador(string buffer[], int index){
                 }
                 char_array[i] = (char *)malloc(100*sizeof(char));
                 char_array[i] = NULL;
-                executa(char_array);
+                executa(char_array, index);
             }else{
                 char *char_array[pipe_index+1];
                 char *char_array_pipe[index-pipe_index+1];
