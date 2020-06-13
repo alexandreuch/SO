@@ -1,7 +1,4 @@
 #include "proto-terminal.h"
-#include <unistd.h>
-#include <cstring>
-#include <sys/wait.h> 
 
 #define NMAX 1000 // maximo  de comandos
 #define SMAX 100  // maximo de argumentos
@@ -139,6 +136,8 @@ int verificaExec(string elemento){
     return 0;
 }
 
+
+
 void executa(char** vetor, int index) { 
     
     pid_t pid = fork();  
@@ -220,6 +219,24 @@ int has_pipe(string buffer[],int index){
     return 0;
 }
 
+int has_change_i(string buffer[],int index){
+    for(int i=0; i<index; i++){
+        if(buffer[i]=="<"){
+            return i;
+        }
+    }
+    return 0;
+}
+
+int has_change_o(string buffer[],int index){
+    for(int i=0; i<index; i++){
+        if(buffer[i]==">"){
+            return i;
+        }
+    }
+    return 0;
+}
+
 void interpretador(string buffer[], int index){
     string pathAux = ("");
 
@@ -259,7 +276,32 @@ void interpretador(string buffer[], int index){
                 }
                 char_array[i] = (char *)malloc(100*sizeof(char));
                 char_array[i] = NULL;
+
+                int change_i = has_change_i(buffer, index);
+                int change_o = has_change_o(buffer, index);
+
+                if(change_i>0){
+                    ifstream in(buffer[change_i+1]);
+                    streambuf *cinbuf = cin.rdbuf(); //save old buf
+                    cin.rdbuf(in.rdbuf()); //redirect std::cin to in.txt!
+                }
+
+                if(change_o>0){
+                    ofstream out(buffer[change_o+1]);
+                    streambuf *coutbuf = cout.rdbuf(); //save old buf
+                    cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
+                }   
+
                 executa(char_array, index);
+
+                if(change_i>0){
+                   cin.rdbuf(cinbuf);   //reset to standard input again
+                }
+
+                if(change_o>0){
+                    cout.rdbuf(coutbuf); //reset to standard output again
+                }
+
             }else{
                 char *char_array[pipe_index+1];
                 char *char_array_pipe[index-pipe_index+1];
