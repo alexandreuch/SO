@@ -266,7 +266,7 @@ void interpretador(string buffer[], int index){
         
         else if(buffer[0][0] == '.' && buffer[0][1] == '/'){
             //Transformar em funcao e usar-la no pipe.
-            int pipe_index = has_pipe(buffer);
+            int pipe_index = has_pipe(buffer, index);
             if(pipe_index==0){
                 char *char_array[index+1];
                 int i = 0;
