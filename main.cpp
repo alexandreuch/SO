@@ -279,6 +279,8 @@ void interpretador(string buffer[], int index){
 
                 int change_i = has_change_i(buffer, index);
                 int change_o = has_change_o(buffer, index);
+                streambuf *cinbuf = NULL;
+                streambuf *coutbuf = NULL;
 
                 if(change_i>0){
                     ifstream in(buffer[change_i+1]);
@@ -294,11 +296,11 @@ void interpretador(string buffer[], int index){
 
                 executa(char_array, index);
 
-                if(change_i>0){
+                if(cinbuf){
                    cin.rdbuf(cinbuf);   //reset to standard input again
                 }
 
-                if(change_o>0){
+                if(coutbuf){
                     cout.rdbuf(coutbuf); //reset to standard output again
                 }
 
