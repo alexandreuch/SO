@@ -258,21 +258,18 @@ void interpretador(string buffer[], int index){
         
 
         if(change_i>0){
-            ifstream in(buffer[change_i+1]);
+            ifstream in(buffer[change_i+1].c_str());
             streambuf *cinbuf = cin.rdbuf(); //save old buf
             cin.rdbuf(in.rdbuf()); //redirect std::cin to in.txt!
             index=-2;
         }
 
         if(change_o>0){
-            ofstream out(buffer[change_o+1]);
+            ofstream out(buffer[change_o+1].c_str());
             streambuf *coutbuf = cout.rdbuf(); //save old buf
             cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
             index=-2;
         }   
-
-
-        // Aqui >>>>>>>
 
         if(buffer[0] == "help"){
             help();
