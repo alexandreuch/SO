@@ -249,6 +249,24 @@ void interpretador(string buffer[], int index){
     }
 
     if(flag == 0){    
+
+        int change_i = has_change_i(buffer, index);
+        int change_o = has_change_o(buffer, index);
+        streambuf *cinbuf = NULL;
+        streambuf *coutbuf = NULL;
+
+        if(change_i>0){
+            ifstream in(buffer[change_i+1]);
+            streambuf *cinbuf = cin.rdbuf(); //save old buf
+            cin.rdbuf(in.rdbuf()); //redirect std::cin to in.txt!
+        }
+
+        if(change_o>0){
+            ofstream out(buffer[change_o+1]);
+            streambuf *coutbuf = cout.rdbuf(); //save old buf
+            cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
+        }   
+
         if(buffer[0] == "help"){
             help();
         }
@@ -277,32 +295,7 @@ void interpretador(string buffer[], int index){
                 char_array[i] = (char *)malloc(100*sizeof(char));
                 char_array[i] = NULL;
 
-                int change_i = has_change_i(buffer, index);
-                int change_o = has_change_o(buffer, index);
-                streambuf *cinbuf = NULL;
-                streambuf *coutbuf = NULL;
-
-                if(change_i>0){
-                    ifstream in(buffer[change_i+1]);
-                    streambuf *cinbuf = cin.rdbuf(); //save old buf
-                    cin.rdbuf(in.rdbuf()); //redirect std::cin to in.txt!
-                }
-
-                if(change_o>0){
-                    ofstream out(buffer[change_o+1]);
-                    streambuf *coutbuf = cout.rdbuf(); //save old buf
-                    cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
-                }   
-
                 executa(char_array, index);
-
-                if(cinbuf){
-                   cin.rdbuf(cinbuf);   //reset to standard input again
-                }
-
-                if(coutbuf){
-                    cout.rdbuf(coutbuf); //reset to standard output again
-                }
 
             }else{
                 char *char_array[pipe_index+1];
@@ -337,6 +330,14 @@ void interpretador(string buffer[], int index){
             }
         
         cout << "O comando '" << aux << "' nao e conhecido.\n";
+        }
+
+        if(cinbuf){
+            cin.rdbuf(cinbuf);   //reset to standard input again
+        }
+
+        if(coutbuf){
+            cout.rdbuf(coutbuf); //reset to standard output again
         }
     }    
 
