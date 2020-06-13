@@ -240,6 +240,11 @@ int has_change_o(string buffer[],int index){
 void interpretador(string buffer[], int index){
     string pathAux = ("");
 
+    int change_i = has_change_i(buffer, index);
+    int change_o = has_change_o(buffer, index);
+    streambuf *cinbuf = NULL;
+    streambuf *coutbuf = NULL;
+
     fs::path diretorio;
     int flagExec = (verificaExec(buffer[0]));
     int flag = verificaPipe(buffer,index);
@@ -250,10 +255,7 @@ void interpretador(string buffer[], int index){
 
     if(flag == 0){    
 
-        int change_i = has_change_i(buffer, index);
-        int change_o = has_change_o(buffer, index);
-        streambuf *cinbuf = NULL;
-        streambuf *coutbuf = NULL;
+        
 
         if(change_i>0){
             ifstream in(buffer[change_i+1]);
@@ -337,13 +339,7 @@ void interpretador(string buffer[], int index){
         cout << "O comando '" << aux << "' nao e conhecido.\n";
         }
 
-        if(cinbuf){
-            cin.rdbuf(cinbuf);   //reset to standard input again
-        }
-
-        if(coutbuf){
-            cout.rdbuf(coutbuf); //reset to standard output again
-        }
+        
     }    
 
     else if(flag == 1){
@@ -402,6 +398,14 @@ void interpretador(string buffer[], int index){
     
     else{
         cout << "O programa não roda tantos pipes.\n";
+    }
+
+    if(cinbuf){
+        cin.rdbuf(cinbuf);   //reset to standard input again
+    }
+
+    if(coutbuf){
+        cout.rdbuf(coutbuf); //reset to standard output again
     }
     
     return;
