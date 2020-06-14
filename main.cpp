@@ -43,7 +43,7 @@ void cd(string buffer[], int index){
     }
 
     flag.assign(pathAux);
-    if(!flag.exists()){
+    if(!fs::exists(flag.path())){
         cout << "Diretório não especificado corretamente.\n";
         return;
     }
@@ -80,7 +80,7 @@ void ls(string buffer[], int index){
 
     diretorio.assign(path);
 
-    if(!diretorio.exists()){
+    if(!fs::exists(diretorio.path())){
         cout << "Diretório não especificado corretamente.\n";
         return;
     }
@@ -138,14 +138,34 @@ int verificaExec(string elemento){
 
 
 
-void executa(char** vetor, int index) { 
+void executa(char** vetor, int index, string i, string o) { 
+    pid_t pid = fork(); 
     
-    pid_t pid = fork();  
-
     if (pid < 0) { 
         cout << "Falha no Fork\n"; 
         return; 
     } else if (!pid) {
+
+        int in, out;
+        if(i.size() > 0){
+            if((in = open(i.c_str(), O_RDONLY)) < 0){
+                        perror("cant open file");
+                        exit(0);                    
+                }
+                dup2(in, 0);
+                close(in);
+        }
+
+        if(o.size()>0){
+            if((out = open(o.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR)) < 0){
+                perror("cant open file");
+                exit(0);                    
+            }
+            dup2(out, 1);
+            close(out);
+        }   
+
+
         int flag = execvp(vetor[0], vetor);
 
         if (flag < 0) { 
@@ -244,6 +264,10 @@ void interpretador(string buffer[], int index){
     int change_o = has_change_o(buffer, index);
     streambuf *cinbuf = NULL;
     streambuf *coutbuf = NULL;
+    ifstream in;
+    ofstream out;
+    string input("");
+    string output("");
 
     fs::path diretorio;
     int flagExec = (verificaExec(buffer[0]));
@@ -254,21 +278,21 @@ void interpretador(string buffer[], int index){
     }
 
     if(flag == 0){    
-
         
-
         if(change_i>0){
-            ifstream in(buffer[change_i+1].c_str());
-            streambuf *cinbuf = cin.rdbuf(); //save old buf
+            input = buffer[change_i+1];
+            in.open(input);
+            cinbuf = cin.rdbuf(); //save old buf
             cin.rdbuf(in.rdbuf()); //redirect std::cin to in.txt!
-            index=-2;
+            index-=2;
         }
 
         if(change_o>0){
-            ofstream out(buffer[change_o+1].c_str());
-            streambuf *coutbuf = cout.rdbuf(); //save old buf
+            output = buffer[change_o+1];
+            out.open(output);
+            coutbuf = cout.rdbuf(); //save old buf
             cout.rdbuf(out.rdbuf()); //redirect std::cout to out.txt!
-            index=-2;
+            index-=2;
         }   
 
         if(buffer[0] == "help"){
@@ -288,6 +312,14 @@ void interpretador(string buffer[], int index){
         
         else if(buffer[0][0] == '.' && buffer[0][1] == '/'){
             //Transformar em funcao e usar-la no pipe.
+
+            if(cinbuf){
+                cin.rdbuf(cinbuf);   //reset to standard input again
+            }
+
+            if(coutbuf){
+                cout.rdbuf(coutbuf); //reset to standard output again
+            }
             int pipe_index = has_pipe(buffer, index);
             if(pipe_index==0){
                 char *char_array[index+1];
@@ -298,8 +330,8 @@ void interpretador(string buffer[], int index){
                 }
                 char_array[i] = (char *)malloc(100*sizeof(char));
                 char_array[i] = NULL;
-
-                executa(char_array, index);
+                
+                executa(char_array, index, input, output);
 
             }else{
                 char *char_array[pipe_index+1];
